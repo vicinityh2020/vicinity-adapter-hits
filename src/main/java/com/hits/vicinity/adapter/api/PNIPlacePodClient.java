@@ -1,7 +1,8 @@
 package com.hits.vicinity.adapter.api;
 
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
+import com.sun.media.jfxmedia.logging.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
@@ -44,25 +45,40 @@ public class PNIPlacePodClient {
      * @see ParkingLot
      */
     public List<ParkingLot> getParkingLots() {
-
+        final String methodName = new Throwable().getStackTrace()[0].getMethodName();
         final String uri = format("https://%s/%s/%s", baseURI, apiVersion, "parking-lots");
 
-        HttpEntity requestEntity = new HttpEntity(defaultHeaders);
+        HttpEntity request = new HttpEntity(defaultHeaders);
 
         try {
-            ResponseEntity<ParkingLot[]> responseEntity =
-                    restTemplate.exchange(uri, HttpMethod.GET, requestEntity, ParkingLot[].class);
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, "Request ...");
+            long startTime = System.nanoTime();
+            ResponseEntity<ParkingLot[]> response =
+                    restTemplate.exchange(uri, HttpMethod.GET, request, ParkingLot[].class);
+            long endTime = System.nanoTime();
 
-            if (responseEntity.getStatusCode() == HttpStatus.OK) {
-                if (requestEntity.hasBody()) {
-                    return Arrays.asList(responseEntity.getBody());
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, String.format("Response! %d ms", (endTime - startTime) / 1000000));
+
+            HttpStatus status = response.getStatusCode();
+            if (status == HttpStatus.OK) {
+                if (response.hasBody()) {
+                    return Arrays.asList(response.getBody());
                 } else {
-                    return emptyList();
+                    Logger.logMsg(Logger.ERROR, this.getClass().getName(),
+                            methodName, "No body in response");
                 }
+            } else {
+                Logger.logMsg(Logger.ERROR, this.getClass().getName(),
+                        methodName, String.format("Status code: %d (%s)", status.value(), status.getReasonPhrase()));
             }
         } catch (RestClientException e) {
+            Logger.logMsg(Logger.ERROR, this.getClass().getName(), methodName, e.getMessage());
             e.printStackTrace();
         }
+        return emptyList();
+    }
+
+    public List<ParkingSensor> getSensors() {
         return emptyList();
     }
 
