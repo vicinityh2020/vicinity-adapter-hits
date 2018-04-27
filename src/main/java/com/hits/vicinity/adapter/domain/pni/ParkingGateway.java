@@ -1,4 +1,4 @@
-package com.hits.vicinity.adapter.model;
+package com.hits.vicinity.adapter.domain.pni;
 
 import java.util.HashMap;
 import java.util.Map;

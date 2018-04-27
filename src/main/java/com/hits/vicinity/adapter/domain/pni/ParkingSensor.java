@@ -1,4 +1,4 @@
-package com.hits.vicinity.adapter.model;
+package com.hits.vicinity.adapter.domain.pni;
 
 import com.fasterxml.jackson.annotation.*;
 
@@ -31,40 +31,57 @@ public class ParkingSensor {
 
     @JsonProperty("sensorId")
     private String sensorId;
+
     @JsonProperty("parkingSpace")
     private String parkingSpace;
+
     @JsonProperty("parkingLot")
     private String parkingLot;
+
     @JsonProperty("parkingLotId")
     private String parkingLotId;
 
     @JsonProperty("network")
-
     private String network;
+
     @JsonProperty("lat")
     private Double lat;
+
     @JsonProperty("lon")
     private Double lon;
+
     @JsonProperty("mode")
     private String mode;
+
     @JsonProperty("status")
     private String status;
+
     @JsonProperty("carPresence")
     private Integer carPresence;
+
     @JsonProperty("carCounter")
     private Integer carCounter;
+
     @JsonProperty("serverTime")
     private String serverTime;
+
     @JsonProperty("gatewayTime")
     private String gatewayTime;
+
     @JsonProperty("sentralTime")
     private Integer sentralTime;
+
+    // received signal strength indicator: https://en.wikipedia.org/wiki/Received_signal_strength_indication
     @JsonProperty("rssi")
     private Integer rssi;
+
+    // signal-to-noise: https://en.wikipedia.org/wiki/Signal-to-noise_ratio_(imaging)
     @JsonProperty("snr")
     private Integer snr;
+
     @JsonProperty("temperature")
     private Double temperature;
+
     @JsonProperty("battery")
     private Integer battery;
     @JsonIgnore

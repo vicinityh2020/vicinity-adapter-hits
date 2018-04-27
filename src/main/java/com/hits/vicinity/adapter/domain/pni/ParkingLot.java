@@ -1,4 +1,4 @@
-package com.hits.vicinity.adapter.model;
+package com.hits.vicinity.adapter.domain.pni;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -32,9 +32,9 @@ public class ParkingLot {
     @JsonProperty("streetAddress")
     private String streetAddress;
     @JsonProperty("latitude")
-    private Double latitude;
+    private double latitude;
     @JsonProperty("longitude")
-    private Double longitude;
+    private double longitude;
     @JsonProperty("cameraId")
     private String cameraId;
     @JsonIgnore
@@ -81,22 +81,22 @@ public class ParkingLot {
     }
 
     @JsonProperty("latitude")
-    public Double getLatitude() {
+    public double getLatitude() {
         return latitude;
     }
 
     @JsonProperty("latitude")
-    public void setLatitude(Double latitude) {
+    public void setLatitude(double latitude) {
         this.latitude = latitude;
     }
 
     @JsonProperty("longitude")
-    public Double getLongitude() {
+    public double getLongitude() {
         return longitude;
     }
 
     @JsonProperty("longitude")
-    public void setLongitude(Double longitude) {
+    public void setLongitude(double longitude) {
         this.longitude = longitude;
     }
 
