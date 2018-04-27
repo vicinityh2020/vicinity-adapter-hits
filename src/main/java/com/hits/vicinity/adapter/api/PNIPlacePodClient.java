@@ -6,15 +6,20 @@ import com.sun.media.jfxmedia.logging.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
+import javax.lang.model.type.ReferenceType;
+import java.lang.ref.Reference;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static java.lang.String.format;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptyMap;
+import static java.util.Collections.singletonList;
 
 @Service
 public class PNIPlacePodClient {
@@ -51,25 +56,16 @@ public class PNIPlacePodClient {
         HttpEntity request = new HttpEntity(defaultHeaders);
 
         try {
-            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, "Request ...");
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, format("Request %s", uri));
             long startTime = System.nanoTime();
             ResponseEntity<ParkingLot[]> response =
                     restTemplate.exchange(uri, HttpMethod.GET, request, ParkingLot[].class);
             long endTime = System.nanoTime();
 
-            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, String.format("Response! %d ms", (endTime - startTime) / 1000000));
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, format("Response! %d ms", (endTime - startTime) / 1000000));
 
-            HttpStatus status = response.getStatusCode();
-            if (status == HttpStatus.OK) {
-                if (response.hasBody()) {
-                    return Arrays.asList(response.getBody());
-                } else {
-                    Logger.logMsg(Logger.ERROR, this.getClass().getName(),
-                            methodName, "No body in response");
-                }
-            } else {
-                Logger.logMsg(Logger.ERROR, this.getClass().getName(),
-                        methodName, String.format("Status code: %d (%s)", status.value(), status.getReasonPhrase()));
+            if (isSuccess(methodName, response.getStatusCode(), response.hasBody())) {
+                return Arrays.asList(response.getBody());
             }
         } catch (RestClientException e) {
             Logger.logMsg(Logger.ERROR, this.getClass().getName(), methodName, e.getMessage());
@@ -78,8 +74,48 @@ public class PNIPlacePodClient {
         return emptyList();
     }
 
-    public List<ParkingSensor> getSensors() {
+    public List<ParkingSensor> postSensors(Map<String, ?> filters) {
+
+        final String methodName = new Throwable().getStackTrace()[0].getMethodName();
+        final String uri = format("https://%s/%s/%s", baseURI, apiVersion, "sensors");
+
+        HttpEntity request = new HttpEntity(defaultHeaders);
+        try {
+
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, format("Requesting %s", uri));
+
+            long startTime = System.nanoTime();
+            ResponseEntity<ParkingSensor[]> response =
+                    restTemplate.exchange(uri, HttpMethod.POST, request, ParkingSensor[].class, filters);
+            long endTime = System.nanoTime();
+
+            Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, String.format("Response received; %d ms", (endTime - startTime) / 1000000));
+
+            if (isSuccess(methodName, response.getStatusCode(), response.hasBody())) {
+                return Arrays.asList(response.getBody());
+            }
+
+        } catch (RestClientException e) {
+            Logger.logMsg(Logger.ERROR, this.getClass().getName(), methodName, e.getMessage());
+            e.printStackTrace();
+        }
+
         return emptyList();
+    }
+
+    private boolean isSuccess(String methodName, HttpStatus status, boolean hasBody) {
+        if (status == HttpStatus.OK) {
+            if (hasBody) {
+                return true;
+            } else {
+                Logger.logMsg(Logger.ERROR, this.getClass().getName(),
+                        methodName, "No body in response");
+            }
+        } else {
+            Logger.logMsg(Logger.ERROR, this.getClass().getName(),
+                    methodName, String.format("Status code: %d (%s)", status.value(), status.getReasonPhrase()));
+        }
+        return false;
     }
 
 }
