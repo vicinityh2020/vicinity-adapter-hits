@@ -309,4 +309,5 @@ public class ParkingSensor {
                 network, lat, lon, mode, status, carPresence, carCounter, serverTime,
                 gatewayTime, sentralTime, rssi, snr, temperature, battery);
     }
+
 }

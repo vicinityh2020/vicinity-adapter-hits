@@ -139,4 +139,5 @@ public class ParkingLot {
 
         return Objects.hash(id, name, description, streetAddress, latitude, longitude, cameraId);
     }
+
 }

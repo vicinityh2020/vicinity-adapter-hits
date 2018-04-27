@@ -97,4 +97,5 @@ public class ParkingGateway {
 
         return Objects.hash(id, gatewayMac, name, parkingLotId);
     }
+
 }
