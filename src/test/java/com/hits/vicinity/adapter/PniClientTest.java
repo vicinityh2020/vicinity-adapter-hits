@@ -1,6 +1,6 @@
 package com.hits.vicinity.adapter;
 
-import com.hits.vicinity.adapter.api.PNIPlacePodClient;
+import com.hits.vicinity.adapter.api.pni.PniClient;
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import org.junit.Before;
 import org.junit.Test;
@@ -9,7 +9,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.RestTemplate;
 
@@ -18,13 +17,13 @@ import java.util.List;
 import static org.junit.Assert.*;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PNIPlacePodClientTest {
+public class PniClientTest {
 
     @Mock
     private RestTemplate restTemplate;
 
     @InjectMocks
-    private PNIPlacePodClient client;
+    private PniClient client;
 
     @Before
     public void setUp() throws Exception {

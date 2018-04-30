@@ -1,6 +1,6 @@
 package com.hits.vicinity.adapter.bootloader;
 
-import com.hits.vicinity.adapter.api.PNIPlacePodClient;
+import com.hits.vicinity.adapter.api.pni.PniClient;
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.sun.media.jfxmedia.logging.Logger;
@@ -15,19 +15,24 @@ import static java.util.Collections.emptyMap;
 @Component
 public class ClientBootloader implements ApplicationListener<ContextRefreshedEvent> {
 
-    private PNIPlacePodClient placePodClient;
+    private PniClient placePodClient;
 
-    public ClientBootloader(PNIPlacePodClient placePodClient) {
+    public ClientBootloader(PniClient placePodClient) {
         this.placePodClient = placePodClient;
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         Logger.setLevel(Logger.DEBUG);
-        List<ParkingSensor> s = placePodClient.postSensors(emptyMap());
+        List<ParkingSensor> s = placePodClient.getSensors(emptyMap());
         List<ParkingLot> l = placePodClient.getParkingLots();
 
         System.out.println(l.get(0).getStreetAddress());
-    }
 
+        if (placePodClient.removeParkingLot(PniClient.byId("5ae4dd390bb8980001692aba"))) {
+            System.out.println("Removed!");
+        }
+
+        System.out.println("Test done");
+    }
 }

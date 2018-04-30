@@ -1,16 +1,19 @@
-package com.hits.vicinity.adapter.api;
+package com.hits.vicinity.adapter.api.pni;
 
+import com.hits.vicinity.adapter.domain.pni.ResponseSuccess;
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.sun.media.jfxmedia.logging.Logger;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpStatusCodeException;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -19,36 +22,31 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 @Service
-public class PNIPlacePodClient {
+public class PniClient {
 
+    private final HttpEntity defaultRequest;
     private RestTemplate restTemplate;
-
     private HttpHeaders defaultHeaders;
 
-    private HttpEntity defaultRequest;
-
-    private Map<HttpMethod, String> crudActions;
+    private static final String PARKING_LOT = "parking-lot";
+    private static final String PARKING_SENSOR = "parking-sensor";
+    private static final String PARKING_GATEWAY = "parking-gateway";
 
     @Value("${pnicloud.client.baseurl}")
-    private String baseURI;
+    private String baseUri;
 
     @Value("${pnicloud.client.apiversion}")
     private String apiVersion;
 
-    public PNIPlacePodClient(RestTemplate restTemplate, @Value("${pnicloud.client.apikey}") String apiKey) {
+    public PniClient(RestTemplate restTemplate, @Value("${pnicloud.client.apikey}") String apiKey) {
         this.restTemplate = restTemplate;
         this.defaultHeaders = new HttpHeaders();
-        this.crudActions = new HashMap<>(3);
 
         defaultHeaders.setAccept(singletonList(MediaType.APPLICATION_JSON));
         defaultHeaders.setContentType(MediaType.APPLICATION_JSON);
         defaultHeaders.set("X-API-KEY", apiKey);
 
         defaultRequest = new HttpEntity(defaultHeaders);
-
-        crudActions.put(HttpMethod.POST, "insert");
-        crudActions.put(HttpMethod.PUT, "update");
-        crudActions.put(HttpMethod.DELETE, "delete");
     }
 
     /**
@@ -59,7 +57,7 @@ public class PNIPlacePodClient {
      */
     public List<ParkingLot> getParkingLots() {
         final String methodName = new Throwable().getStackTrace()[0].getMethodName();
-        final String uri = format("https://%s/%s/%s", baseURI, apiVersion, "parking-lots");
+        final String uri = format("https://%s/%s/%s", baseUri, apiVersion, "parking-lots");
 
         try {
             Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, format("Request %s", uri));
@@ -80,10 +78,10 @@ public class PNIPlacePodClient {
         return emptyList();
     }
 
-    public List<ParkingSensor> postSensors(Map<String, ?> filters) {
+    public List<ParkingSensor> getSensors(Map<String, ?> filters) {
 
         final String methodName = new Throwable().getStackTrace()[0].getMethodName();
-        final String uri = format("https://%s/%s/%s", baseURI, apiVersion, "sensors");
+        final String uri = format("https://%s/%s/%s", baseUri, apiVersion, "sensors");
 
         try {
 
@@ -108,21 +106,44 @@ public class PNIPlacePodClient {
         return emptyList();
     }
 
-    private boolean performCrudAction(String domainName, HttpMethod method, Map<String, ?> filters) {
+    private boolean performCrudAction(String modelName, HttpMethod method, JSONObject filters) {
         final String methodName = new Throwable().getStackTrace()[0].getMethodName();
-        final String uri = format("https://%s/%s/%s/%s", baseURI, apiVersion, domainName, this.crudActions.get(method));
+        final String actionEndpoint;
 
+        switch (method) {
+            case PUT:
+                actionEndpoint = "update";
+                break;
+            case POST:
+                actionEndpoint = "insert";
+                break;
+            case DELETE:
+                actionEndpoint = "remove";
+                break;
+            default:
+                Logger.logMsg(Logger.ERROR, this.getClass().getName(), methodName,
+                        format("Method \"%s\" is not supported on the model \"%s\".",
+                                method.toString(), modelName));
+                return false;
+        }
+
+        final String uri = format("https://%s/%s/%s/%s", baseUri, apiVersion, modelName, actionEndpoint);
+
+        HttpEntity<String> request = new HttpEntity<>(filters.toString(), defaultHeaders);
         try {
-            ResponseEntity response = restTemplate.exchange(uri, method, defaultRequest, Object.class, filters);
+            ResponseEntity<ResponseSuccess> response = restTemplate
+                    .exchange(uri, method, request, ResponseSuccess.class);
 
             if (isSuccess(methodName, response.getStatusCode(), response.hasBody())) {
                 return true;
             }
-
+        } catch (HttpStatusCodeException e) {
+            e.printStackTrace();
         } catch (RestClientException e) {
-            Logger.logMsg(Logger.ERROR, this.getClass().getName(), methodName, e.getMessage());
             e.printStackTrace();
         }
+
+
 
         return false;
     }
@@ -133,13 +154,59 @@ public class PNIPlacePodClient {
                 return true;
             } else {
                 Logger.logMsg(Logger.ERROR, this.getClass().getName(),
-                        methodName, "No body in response");
+                        methodName, "No body in response.");
             }
         } else {
             Logger.logMsg(Logger.ERROR, this.getClass().getName(),
-                    methodName, String.format("Status code: %d (%s)", status.value(), status.getReasonPhrase()));
+                    methodName, String.format("Status code: %d (%s).", status.value(), status.getReasonPhrase()));
         }
         return false;
     }
 
+    public boolean updateParkingLot(JSONObject updateBy) {
+        return performCrudAction(PARKING_LOT, HttpMethod.PUT, updateBy);
+    }
+
+    public boolean insertParkingLot(JSONObject insertBy) {
+        return performCrudAction(PARKING_LOT, HttpMethod.POST, insertBy);
+    }
+
+    public boolean removeParkingLot(JSONObject removeBy) {
+        return performCrudAction(PARKING_LOT, HttpMethod.DELETE, removeBy);
+    }
+
+    public boolean updateParkingSensor(JSONObject updateBy) {
+        return performCrudAction(PARKING_SENSOR, HttpMethod.PUT, updateBy);
+    }
+
+    public boolean insertParkingSensor(JSONObject insertBy) {
+        return performCrudAction(PARKING_SENSOR, HttpMethod.POST, insertBy);
+    }
+
+    public boolean removeParkingSensor(JSONObject removeBy) {
+        return performCrudAction(PARKING_SENSOR, HttpMethod.DELETE, removeBy);
+    }
+
+    public boolean updateParkingGateway(JSONObject updateBy) {
+        return performCrudAction(PARKING_GATEWAY, HttpMethod.PUT, updateBy);
+    }
+
+    public boolean insertParkingGateway(JSONObject insertBy) {
+        return performCrudAction(PARKING_GATEWAY, HttpMethod.POST, insertBy);
+    }
+
+    public boolean removeParkingGateway(JSONObject removeBy) {
+        return performCrudAction(PARKING_GATEWAY, HttpMethod.DELETE, removeBy);
+    }
+
+    public static JSONObject byId(String id) {
+        JSONObject jsonObject = new JSONObject();
+        try {
+            jsonObject.put("id", id);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return jsonObject;
+    }
 }
