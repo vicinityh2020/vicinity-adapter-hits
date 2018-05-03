@@ -1,5 +1,7 @@
 package com.hits.vicinity.adapter.api.pni;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hits.vicinity.adapter.domain.pni.ResponseSuccess;
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
@@ -129,6 +131,18 @@ public class PniClient {
 
         final String uri = format("https://%s/%s/%s/%s", baseUri, apiVersion, modelName, actionEndpoint);
 
+//        ParkingLot newFilters = new ParkingLot();
+//
+//        ObjectMapper mapper = new ObjectMapper();
+//        newFilters.setId("geefeww3rwfsdds");
+//        String s;
+//        try {
+//            s = mapper.writeValueAsString(newFilters);
+//            System.out.println("hello");
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//        }
+
         HttpEntity<String> request = new HttpEntity<>(filters.toString(), defaultHeaders);
         try {
             ResponseEntity<ResponseSuccess> response = restTemplate
@@ -209,4 +223,6 @@ public class PniClient {
 
         return jsonObject;
     }
+
+
 }
