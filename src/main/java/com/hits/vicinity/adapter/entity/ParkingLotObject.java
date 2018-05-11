@@ -1,25 +1,29 @@
 package com.hits.vicinity.adapter.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.UpdateTimestamp;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
+import java.util.UUID;
 
 @Entity
-@EntityListeners(AuditingEntityListener.class)
+
 @Table(name = "parking_lot")
 @JsonIgnoreProperties(value = {"created_at", "last_modified"}, allowGetters = true)
-public class ParkingLotObject implements Serializable {
+public class ParkingLotObject extends AbstractTimestampEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private long id;
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "oid", updatable = false, nullable = false)
+    private UUID oid;
 
-    @Column(name = "pni_id", unique = true)
-    private String pniId;
+    @Column(name = "lot_id", unique = true)
+    private String lotId;
 
     @Column(name = "lot_name")
     private String lotName;
@@ -39,26 +43,16 @@ public class ParkingLotObject implements Serializable {
     @Column(name = "longitude")
     private Double longitude;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @CreatedDate
-    private java.util.Date createdAtDate;
-
-    @Column(name = "last_modified", nullable = false, updatable = false)
-    @Temporal(TemporalType.TIMESTAMP)
-    @LastModifiedDate
-    private java.util.Date lastModifiedDate;
-
-    public long getId() {
-        return id;
+    public UUID getOid() {
+        return oid;
     }
 
-    public String getPniId() {
-        return pniId;
+    public String getLotId() {
+        return lotId;
     }
 
-    public void setPniId(String pniId) {
-        this.pniId = pniId;
+    public void setLotId(String lotId) {
+        this.lotId = lotId;
     }
 
     public String getLotName() {

@@ -131,18 +131,6 @@ public class PniClient {
 
         final String uri = format("https://%s/%s/%s/%s", baseUri, apiVersion, modelName, actionEndpoint);
 
-//        ParkingLot newFilters = new ParkingLot();
-//
-//        ObjectMapper mapper = new ObjectMapper();
-//        newFilters.setId("geefeww3rwfsdds");
-//        String s;
-//        try {
-//            s = mapper.writeValueAsString(newFilters);
-//            System.out.println("hello");
-//        } catch (JsonProcessingException e) {
-//            e.printStackTrace();
-//        }
-
         HttpEntity<String> request = new HttpEntity<>(filters.toString(), defaultHeaders);
         try {
             ResponseEntity<ResponseSuccess> response = restTemplate
@@ -156,8 +144,6 @@ public class PniClient {
         } catch (RestClientException e) {
             e.printStackTrace();
         }
-
-
 
         return false;
     }
