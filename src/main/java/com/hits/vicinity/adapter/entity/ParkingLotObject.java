@@ -13,7 +13,7 @@ import java.util.UUID;
 
 @Entity
 
-@Table(name = "parking_lot")
+@Table(name = "lots")
 @JsonIgnoreProperties(value = {"created_at", "last_modified"}, allowGetters = true)
 public class ParkingLotObject extends AbstractTimestampEntity implements Serializable {
     @Id
@@ -22,7 +22,7 @@ public class ParkingLotObject extends AbstractTimestampEntity implements Seriali
     @Column(name = "oid", updatable = false, nullable = false)
     private UUID oid;
 
-    @Column(name = "lot_id", unique = true)
+    @Column(name = "lot_id", unique = true, nullable = false)
     private String lotId;
 
     @Column(name = "lot_name")

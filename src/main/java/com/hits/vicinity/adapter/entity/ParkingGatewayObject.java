@@ -9,7 +9,7 @@ import java.util.UUID;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
-@Table(name = "parking_lot")
+@Table(name = "gateways")
 public class ParkingGatewayObject extends AbstractTimestampEntity implements Serializable {
     @Id
     @GeneratedValue(generator = "UUID")
