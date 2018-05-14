@@ -2,6 +2,7 @@ package com.hits.vicinity.adapter.controller;
 
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.hits.vicinity.adapter.domain.vicinity.ObjectsJson;
+import com.hits.vicinity.adapter.entity.ParkingSensorObject;
 import com.hits.vicinity.adapter.repository.ParkingLotRepository;
 import com.hits.vicinity.adapter.repository.ParkingSensorRepository;
 import org.springframework.http.HttpHeaders;
@@ -11,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -29,6 +31,19 @@ public class VicinityApiController {
     public ResponseEntity<ObjectsJson> getObjects() {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NOT_FOUND;
+
+        List<ParkingSensorObject> sensors = parkingSensorRepository.findAll();
+        ObjectsJson responseTemplate = new ObjectsJson();
+
+        for (ParkingSensorObject sensor : sensors) {
+            responseTemplate.setOid(sensor.getOid().toString());
+            responseTemplate.setActions(Collections.emptyList());
+            responseTemplate.setEvents(Collections.emptyList());
+            // TODO: TEMP
+            responseTemplate.setName("sensor.getName");
+            responseTemplate.setType("sensor.getType");
+        }
+
         return null;
 
     }
