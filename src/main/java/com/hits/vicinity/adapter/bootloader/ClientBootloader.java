@@ -28,13 +28,13 @@ public class ClientBootloader implements ApplicationListener<ContextRefreshedEve
 
         this.placePodClient = placePodClient;
         this.parkingLotRepository = parkingLotRepository;
+        this.parkingSensorRepository = parkingSensorRepository;
     }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         Logger.setLevel(Logger.DEBUG);
         List<ParkingLot> syncedLots = syncParkingLots();
-
         System.out.println("Test done");
     }
 

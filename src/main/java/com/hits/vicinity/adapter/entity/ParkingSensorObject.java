@@ -22,7 +22,7 @@ public class ParkingSensorObject extends AbstractTimestampEntity implements Seri
     private UUID oid;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "lot_id")
+    @JoinColumn(name = "lot_oid")
     private ParkingLotObject lot;
 
     @Column(name = "sensor_id", nullable = false, unique = true)
