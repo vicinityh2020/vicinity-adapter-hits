@@ -1,6 +1,5 @@
 package com.hits.vicinity.adapter.domain.vicinity;
 
-
 import java.util.HashMap;
 import java.util.Map;
 import com.fasterxml.jackson.annotation.JsonAnyGetter;
@@ -12,43 +11,49 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
-        "property",
-        "value"
+        "status",
+        "error",
+        "message"
 })
-public class Property {
+public class ErrorMessage {
 
-    @JsonProperty("property")
-    private String property;
-    @JsonProperty("value")
-    private Integer value;
+    @JsonProperty("status")
+    private Integer status;
+    @JsonProperty("error")
+    private String error;
+    @JsonProperty("message")
+    private String message;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
-    public Property() {}
-
-    public Property(String property, int value) {
-        this.property = property;
-        this.value = value;
+    @JsonProperty("status")
+    public Integer getStatus() {
+        return status;
     }
 
-    @JsonProperty("property")
-    public String getProperty() {
-        return property;
+    @JsonProperty("status")
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
-    @JsonProperty("property")
-    public void setProperty(String property) {
-        this.property = property;
+    @JsonProperty("error")
+    public String getError() {
+        return error;
     }
 
-    @JsonProperty("value")
-    public Integer getValue() {
-        return value;
+    @JsonProperty("error")
+    public void setError(String error) {
+        this.error = error;
     }
 
-    @JsonProperty("value")
-    public void setValue(Integer value) {
-        this.value = value;
+    @JsonProperty("message")
+    public String getMessage() {
+        return message;
+    }
+
+    @JsonProperty("message")
+    public void setMessage(String message) {
+        this.message = message;
     }
 
     @JsonAnyGetter

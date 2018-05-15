@@ -15,7 +15,7 @@ import com.fasterxml.jackson.databind.JsonNode;
         "type",
         "field"
 })
-public class Output {
+public class OutputInputSchema {
 
     @JsonProperty("type")
     private String type;

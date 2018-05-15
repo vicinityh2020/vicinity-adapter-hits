@@ -28,7 +28,7 @@ public class ObjectsJson {
     @JsonProperty("type")
     private String type;
     @JsonProperty("properties")
-    private List<Property> properties = null;
+    private List<PropertySchema> properties = null;
     @JsonProperty("actions")
     private List<Object> actions = null;
     @JsonProperty("events")
@@ -67,12 +67,12 @@ public class ObjectsJson {
     }
 
     @JsonProperty("properties")
-    public List<Property> getProperties() {
+    public List<PropertySchema> getProperties() {
         return properties;
     }
 
     @JsonProperty("properties")
-    public void setProperties(List<Property> properties) {
+    public void setProperties(List<PropertySchema> properties) {
         this.properties = properties;
     }
 

@@ -2,25 +2,32 @@ package com.hits.vicinity.adapter.controller;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.hits.vicinity.adapter.domain.vicinity.*;
 import com.hits.vicinity.adapter.entity.ParkingSensorObject;
 import com.hits.vicinity.adapter.repository.ParkingLotRepository;
 import com.hits.vicinity.adapter.repository.ParkingSensorRepository;
+import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.BeanPropertyBindingResult;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.HttpStatusCodeException;
+import org.springframework.web.client.RestClientException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import javax.persistence.NoResultException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Collections.*;
 
@@ -30,6 +37,7 @@ public class VicinityApiController {
     private ParkingLotRepository parkingLotRepository;
     private ParkingSensorRepository parkingSensorRepository;
     private ObjectMapper mapper;
+    private PropertySchema availabilityProperty;
 
     private static final String statusPropertyEndpoint = "/device/{oid}/property/{pid}";
 
@@ -38,6 +46,7 @@ public class VicinityApiController {
         this.parkingLotRepository = parkingLotRepository;
         this.parkingSensorRepository = parkingSensorRepository;
         this.mapper = new ObjectMapper();
+        prepareObjects();
     }
 
     private ObjectNode createField(String name, String type) {
@@ -46,18 +55,13 @@ public class VicinityApiController {
                 .putPOJO("schema", mapper.valueToTree(singletonMap("type", type)));
     }
 
-    @GetMapping(value = "/objects", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ObjectsJson> getObjects() {
-        HttpHeaders headers = new HttpHeaders();
-        HttpStatus status = HttpStatus.NOT_FOUND;
-
-        ObjectsJson responseTemplate = new ObjectsJson();
+    private void prepareObjects() {
 
         List<ObjectNode> outputFields = new ArrayList<>();
         outputFields.add(createField("property", "string"));
         outputFields.add(createField("value", "integer"));
 
-        Output readLinkOutput = new Output();
+        OutputInputSchema readLinkOutput = new OutputInputSchema();
         readLinkOutput.setType("object");
         readLinkOutput.setField(mapper.valueToTree(outputFields));
 
@@ -65,11 +69,11 @@ public class VicinityApiController {
         readLink.setHref(statusPropertyEndpoint);
         readLink.setOutput(readLinkOutput);
 
-        Output writeLinkInput = new Output();
+        OutputInputSchema writeLinkInput = new OutputInputSchema();
         writeLinkInput.setType("object");
-        writeLinkInput.setField(mapper.valueToTree(singletonList(createField("vacancy", "integer"))));
+        writeLinkInput.setField(mapper.valueToTree(singletonList(createField("value", "integer"))));
 
-        Output writeLinkOutput = new Output();
+        OutputInputSchema writeLinkOutput = new OutputInputSchema();
         writeLinkOutput.setType("object");
         writeLinkOutput.setField(mapper.valueToTree(singletonList(createField("success", "boolean"))));
 
@@ -78,11 +82,22 @@ public class VicinityApiController {
         writeLink.setInput(writeLinkInput);
         writeLink.setOutput(writeLinkOutput);
 
-        Property property = new Property();
+        PropertySchema property = new PropertySchema();
         property.setPid("status");
-        property.setMonitors("Parking space vacancy");
+        property.setMonitors("Availability");
         property.setReadLink(readLink);
         property.setWriteLink(writeLink);
+
+        this.availabilityProperty = property;
+    }
+
+    @GetMapping(value = "/objects", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<ObjectsJson> getObjects() {
+
+        HttpHeaders headers = new HttpHeaders();
+        HttpStatus status = HttpStatus.NOT_FOUND;
+
+        ObjectsJson responseTemplate = new ObjectsJson();
 
         List<ParkingSensorObject> sensors = parkingSensorRepository.findAll();
 
@@ -98,7 +113,7 @@ public class VicinityApiController {
                 responseTemplate.setName("sensor.getName");
                 responseTemplate.setType("sensor.getType");
 
-                responseTemplate.setProperties(singletonList(property));
+                responseTemplate.setProperties(singletonList(availabilityProperty));
 
                 responseTemplate.setActions(emptyList());
                 responseTemplate.setEvents(emptyList());
@@ -110,12 +125,47 @@ public class VicinityApiController {
     }
 
     @GetMapping(value = statusPropertyEndpoint, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ObjectsJson> getProperty() {
-        return null;
+    public ResponseEntity<Property> getProperty(@PathVariable("oid") UUID oid, @PathVariable("pid") String pid) {
+        // TODO: way later, more coherent path variable validation using BindingResults and custom validator class
+
+        Optional<ParkingSensorObject> optionalSensor = parkingSensorRepository.findById(oid);
+        ParkingSensorObject sensor = optionalSensor.orElseThrow(() -> new NoResultException("Supplied oid does not exist"));
+
+        if (!pid.equals("status")) {
+            throw new NoResultException("Supplied property does not exist for the given oid");
+        }
+
+        // TODO: Fix 1 to be sensor.getStatus()
+        return new ResponseEntity<>(new Property(pid, 1), HttpStatus.OK);
+
     }
 
-    @PutMapping(value = statusPropertyEndpoint, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ObjectsJson> updateProperty() {
-        return null;
+    @PutMapping(value = statusPropertyEndpoint,
+            consumes = MediaType.APPLICATION_JSON_UTF8_VALUE,
+            produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
+    public ResponseEntity<JsonNode> updateProperty(
+            @PathVariable("oid") UUID oid,
+            @PathVariable("pid") String pid,
+            @RequestBody ObjectNode o) {
+
+        // TODO: way later, more coherent path variable validation using BindingResults and custom validator class
+        // TODO: Proper body validation using custom class and custom exception handling
+
+        Optional<ParkingSensorObject> optionalSensor = parkingSensorRepository.findById(oid);
+        ParkingSensorObject sensor = optionalSensor.orElseThrow(() -> new NoResultException("Supplied oid does not exist"));
+
+        if (!pid.equals("status")) {
+            throw new NoResultException("Supplied property does not exist for the given oid");
+        }
+
+        JsonNode statusNode = o.get("value");
+
+        // TODO: sensor.setStatus(status)
+
+        if (statusNode.canConvertToInt()) {
+            return new ResponseEntity<>(JsonNodeFactory.instance.objectNode().put("success", true), HttpStatus.OK);
+        }
+
+        return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
     }
 }

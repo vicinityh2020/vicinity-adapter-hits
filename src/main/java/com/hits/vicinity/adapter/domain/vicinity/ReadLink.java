@@ -19,7 +19,7 @@ public class ReadLink {
     @JsonProperty("href")
     private String href;
     @JsonProperty("output")
-    private Output output;
+    private OutputInputSchema output;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -34,12 +34,12 @@ public class ReadLink {
     }
 
     @JsonProperty("output")
-    public Output getOutput() {
+    public OutputInputSchema getOutput() {
         return output;
     }
 
     @JsonProperty("output")
-    public void setOutput(Output output) {
+    public void setOutput(OutputInputSchema output) {
         this.output = output;
     }
 
