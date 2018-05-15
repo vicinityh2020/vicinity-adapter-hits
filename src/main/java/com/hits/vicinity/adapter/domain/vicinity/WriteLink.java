@@ -20,9 +20,9 @@ public class WriteLink {
     @JsonProperty("href")
     private String href;
     @JsonProperty("input")
-    private String input;
+    private Output input;
     @JsonProperty("output")
-    private String output;
+    private Output output;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -37,22 +37,22 @@ public class WriteLink {
     }
 
     @JsonProperty("input")
-    public String getInput() {
+    public Output getInput() {
         return input;
     }
 
     @JsonProperty("input")
-    public void setInput(String input) {
+    public void setInput(Output input) {
         this.input = input;
     }
 
     @JsonProperty("output")
-    public String getOutput() {
+    public Output getOutput() {
         return output;
     }
 
     @JsonProperty("output")
-    public void setOutput(String output) {
+    public void setOutput(Output output) {
         this.output = output;
     }
 
