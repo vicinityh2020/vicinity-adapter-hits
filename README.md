@@ -66,16 +66,20 @@ MANPATH=$MANPATH:/home/opt/PostgreSQL/9.6/share/man
 
 ## Compilation & Running using Maven
 To compile when in the root folder of the project:
+
 `mvn clean install`
 
 In case compilation fails due to failing tests - it is possible to ignore tests running:
+
 `mvn clean install -DskipTests`
 
 To run the adapter use the .jar from ./target directory.
+
 `java -jar target/adapter-0.0.1-SNAPSHOT.jar`
 
 
 Alternatively to all of the above, you may use this to quickly compile & run the adapter: 
+
 `$ mvn spring-boot:run`
 
 
