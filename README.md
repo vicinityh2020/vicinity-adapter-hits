@@ -2,6 +2,7 @@
 ## Architecture
 The adapter bridges communication with the PNI cloud and the VICINITY agent. The adapter consumes the aforementioned endpoints and produces the appropriate data.
 
+![](./doc/img/arch.png)
 
 ## Installation
 
@@ -24,11 +25,11 @@ To let Maven work everywhere you need to export following environmental variable
 
 Now append the M2 variable to the system path:
 
-`PATH=$M2:$PATH
+`PATH=$M2:$PATH`
 
 Finally, verify if Maven has been added by running:
 
-`$ mvn -version
+`$ mvn -version`
 
 The output should be as follows:
 ```
