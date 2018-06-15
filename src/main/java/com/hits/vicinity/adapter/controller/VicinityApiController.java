@@ -92,7 +92,7 @@ public class VicinityApiController {
     }
 
     @GetMapping(value = "/objects", produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
-    public ResponseEntity<ObjectsJson> getObjects() {
+    public ResponseEntity<ThingDescriptor> getObjects() {
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NOT_FOUND;
@@ -120,8 +120,14 @@ public class VicinityApiController {
             }
         }
 
+        ThingDescriptor thingDescriptor = new ThingDescriptor();
+
+        // TODO: temp value "1"
+        thingDescriptor.setAdapterId("1");
+        thingDescriptor.setThingDescriptions(singletonList(responseTemplate));
+
         // TODO: add last modified header
-        return new ResponseEntity<>(responseTemplate, headers, status);
+        return new ResponseEntity<>(thingDescriptor, headers, status);
     }
 
     @GetMapping(value = statusPropertyEndpoint, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
