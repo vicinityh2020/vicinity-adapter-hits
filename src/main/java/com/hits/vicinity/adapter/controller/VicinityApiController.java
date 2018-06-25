@@ -46,7 +46,6 @@ public class VicinityApiController {
         this.parkingLotRepository = parkingLotRepository;
         this.parkingSensorRepository = parkingSensorRepository;
         this.mapper = new ObjectMapper();
-        prepareObjects();
     }
 
     private ObjectNode createField(String name, String type) {
@@ -55,7 +54,7 @@ public class VicinityApiController {
                 .putPOJO("schema", mapper.valueToTree(singletonMap("type", type)));
     }
 
-    private void prepareObjects() {
+    private void prepareObjects(String endpoint) {
 
         List<ObjectNode> outputFields = new ArrayList<>();
         outputFields.add(createField("property", "string"));
@@ -66,7 +65,7 @@ public class VicinityApiController {
         readLinkOutput.setField(mapper.valueToTree(outputFields));
 
         ReadLink readLink = new ReadLink();
-        readLink.setHref(statusPropertyEndpoint);
+        readLink.setHref(endpoint);
         readLink.setOutput(readLinkOutput);
 
         OutputInputSchema writeLinkInput = new OutputInputSchema();
@@ -78,13 +77,13 @@ public class VicinityApiController {
         writeLinkOutput.setField(mapper.valueToTree(singletonList(createField("success", "boolean"))));
 
         WriteLink writeLink = new WriteLink();
-        writeLink.setHref(statusPropertyEndpoint);
+        writeLink.setHref(endpoint);
         writeLink.setInput(writeLinkInput);
         writeLink.setOutput(writeLinkOutput);
 
         PropertySchema property = new PropertySchema();
         property.setPid("status");
-        property.setMonitors("Availability");
+        property.setMonitors("adapters:DeviceStatus");
         property.setReadLink(readLink);
         property.setWriteLink(writeLink);
 
@@ -111,7 +110,9 @@ public class VicinityApiController {
                 responseTemplate.setOid(sensor.getOid().toString());
                 // TODO: TEMP, use real name/type later
                 responseTemplate.setName("sensor.getName");
-                responseTemplate.setType("sensor.getType");
+                responseTemplate.setType("core:Device");
+
+                prepareObjects(String.format("/device/%s/property/%s", sensor.getOid().toString(), "status"));
 
                 responseTemplate.setProperties(singletonList(availabilityProperty));
 
