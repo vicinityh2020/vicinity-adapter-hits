@@ -1,6 +1,5 @@
 package com.hits.vicinity.adapter.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -30,6 +29,61 @@ public class ParkingSensorObject extends AbstractTimestampEntity implements Seri
 
     @Column(name = "network", nullable = false)
     private String network;
+
+    @Column(name = "parking_space_id")
+    private String parkingSpaceId;
+
+    @Column(name = "parking_lot_name")
+    private String parkingLotName;
+
+    @Column(name = "status")
+    private String status;
+
+    @Column(name = "car_presence")
+    private Integer carPresence;
+
+    @Column(name = "car_counter")
+    private Integer carCounter;
+
+    public String getParkingSpaceId() {
+        return parkingSpaceId;
+    }
+
+    public void setParkingSpaceId(String parkingSpaceId) {
+        this.parkingSpaceId = parkingSpaceId;
+    }
+
+    public String getParkingLotName() {
+        return parkingLotName;
+    }
+
+    public void setParkingLotName(String parkingLotName) {
+        this.parkingLotName = parkingLotName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public Integer getCarPresence() {
+        return carPresence;
+    }
+
+    public void setCarPresence(Integer carPresence) {
+        this.carPresence = carPresence;
+    }
+
+    public Integer getCarCounter() {
+        return carCounter;
+    }
+
+    public void setCarCounter(Integer carCounter) {
+        this.carCounter = carCounter;
+    }
 
     public UUID getOid() {
         return oid;

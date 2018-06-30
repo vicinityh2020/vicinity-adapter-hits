@@ -39,7 +39,7 @@ public class VicinityApiController {
     private ObjectMapper mapper;
     private PropertySchema availabilityProperty;
 
-    private static final String statusPropertyEndpoint = "/device/{oid}/property/{pid}";
+    private static final String statusPropertyEndpoint = "/devices/{oid}/properties/{pid}";
 
     public VicinityApiController(ParkingLotRepository parkingLotRepository,
                                  ParkingSensorRepository parkingSensorRepository) {
@@ -112,7 +112,7 @@ public class VicinityApiController {
                 responseTemplate.setName("sensor.getName");
                 responseTemplate.setType("core:Device");
 
-                prepareObjects(String.format("/device/%s/property/%s", sensor.getOid().toString(), "status"));
+                prepareObjects(String.format("/devices/%s/properties/%s", sensor.getOid().toString(), "status"));
 
                 responseTemplate.setProperties(singletonList(availabilityProperty));
 
@@ -133,7 +133,6 @@ public class VicinityApiController {
 
     @GetMapping(value = statusPropertyEndpoint, produces = MediaType.APPLICATION_JSON_UTF8_VALUE)
     public ResponseEntity<Property> getProperty(@PathVariable("oid") UUID oid, @PathVariable("pid") String pid) {
-        // TODO: way later, more coherent path variable validation using BindingResults and custom validator class
 
         Optional<ParkingSensorObject> optionalSensor = parkingSensorRepository.findById(oid);
         ParkingSensorObject sensor = optionalSensor.orElseThrow(() -> new NoResultException("Supplied oid does not exist"));
@@ -154,9 +153,6 @@ public class VicinityApiController {
             @PathVariable("oid") UUID oid,
             @PathVariable("pid") String pid,
             @RequestBody ObjectNode o) {
-
-        // TODO: way later, more coherent path variable validation using BindingResults and custom validator class
-        // TODO: Proper body validation using custom class and custom exception handling
 
         Optional<ParkingSensorObject> optionalSensor = parkingSensorRepository.findById(oid);
         ParkingSensorObject sensor = optionalSensor.orElseThrow(() -> new NoResultException("Supplied oid does not exist"));

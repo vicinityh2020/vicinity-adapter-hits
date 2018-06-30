@@ -6,6 +6,7 @@ import com.hits.vicinity.adapter.domain.pni.ResponseSuccess;
 import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.sun.media.jfxmedia.logging.Logger;
+import jdk.nashorn.internal.ir.ObjectNode;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;
@@ -80,7 +81,7 @@ public class PniClient {
         return emptyList();
     }
 
-    public List<ParkingSensor> getSensors(Map<String, ?> filters) {
+    public List<ParkingSensor> getSensors(ObjectNode filters) {
 
         final String methodName = new Throwable().getStackTrace()[0].getMethodName();
         final String uri = format("https://%s/%s/%s", baseUri, apiVersion, "sensors");
@@ -90,8 +91,12 @@ public class PniClient {
             Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, format("Requesting %s", uri));
 
             long startTime = System.nanoTime();
-            ResponseEntity<ParkingSensor[]> response =
-                    restTemplate.exchange(uri, HttpMethod.POST, defaultRequest, ParkingSensor[].class, filters);
+            ResponseEntity<ParkingSensor[]> response;
+            if (filters != null) {
+                response = restTemplate.exchange(uri, HttpMethod.POST, defaultRequest, ParkingSensor[].class, filters.toString());
+            } else {
+                response = restTemplate.exchange(uri, HttpMethod.POST, defaultRequest, ParkingSensor[].class);
+            }
             long endTime = System.nanoTime();
 
             Logger.logMsg(Logger.DEBUG, this.getClass().getName(), methodName, String.format("Response received; %d ms", (endTime - startTime) / 1000000));

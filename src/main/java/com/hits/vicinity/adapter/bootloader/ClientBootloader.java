@@ -35,6 +35,7 @@ public class ClientBootloader implements ApplicationListener<ContextRefreshedEve
     public void onApplicationEvent(ContextRefreshedEvent contextRefreshedEvent) {
         Logger.setLevel(Logger.DEBUG);
         List<ParkingLot> syncedLots = syncParkingLots();
+
         System.out.println("Test done");
     }
 
@@ -42,28 +43,22 @@ public class ClientBootloader implements ApplicationListener<ContextRefreshedEve
         List<ParkingLot> lots = placePodClient.getParkingLots();
 
         lots.forEach(parkingLot -> {
-            ParkingLotObject parkingLotObject = new ParkingLotObject();
 
-            parkingLotObject.setLotId(parkingLot.getId());
-            parkingLotObject.setLotName(parkingLot.getName());
-            parkingLotObject.setStreetAddress(parkingLot.getStreetAddress());
-            parkingLotObject.setLatitude(parkingLot.getLatitude());
-            parkingLotObject.setLongitude(parkingLot.getLongitude());
-            parkingLotObject.setDescription(parkingLot.getDescription());
-            parkingLotObject.setCameraId(parkingLot.getCameraId());
+            ParkingLotObject other = new ParkingLotObject();
+
+            other.setLotId(parkingLot.getId());
+            other.setLotName(parkingLot.getName());
+            other.setStreetAddress(parkingLot.getStreetAddress());
+            other.setLatitude(parkingLot.getLatitude());
+            other.setLongitude(parkingLot.getLongitude());
+            other.setDescription(parkingLot.getDescription());
+            other.setCameraId(parkingLot.getCameraId());
+
+            ParkingLotObject parkingLotObject = this.parkingLotRepository.findByLotId(parkingLot.getId()).orElse(other);
 
             parkingLotRepository.save(parkingLotObject);
 
         });
-
-        // TODO: TEST DATA, REMOVE LATER
-        ParkingSensorObject parkingSensorObject = new ParkingSensorObject();
-        ParkingLotObject parkingLotObject =  parkingLotRepository.findAll().get(0);
-        parkingSensorObject.setLot(parkingLotObject);
-        parkingSensorObject.setNetwork("PNI");
-        parkingSensorObject.setSensorId("008000000400882F");
-
-        parkingSensorRepository.save(parkingSensorObject);
 
         return lots;
     }
