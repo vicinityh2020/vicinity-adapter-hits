@@ -96,9 +96,8 @@ public class VicinityApiController {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NOT_FOUND;
 
-        ObjectsJson responseTemplate = new ObjectsJson();
-
         List<ParkingSensorObject> sensors = parkingSensorRepository.findAll();
+        List<ObjectsJson> exposedDevices = new ArrayList<ObjectsJson>();
 
         if (sensors.size() > 0) {
 
@@ -107,9 +106,12 @@ public class VicinityApiController {
             // TODO: for now we only have 1 property and 1 object
             // TODO: make it so that more properties/objects can be added to the responseTemplate
             for (ParkingSensorObject sensor : sensors) {
+
+                ObjectsJson responseTemplate = new ObjectsJson();
+
                 responseTemplate.setOid(sensor.getOid().toString());
                 // TODO: TEMP, use real name/type later
-                responseTemplate.setName("sensor.getName");
+                responseTemplate.setName(sensor.getSensorId());
                 responseTemplate.setType("core:Device");
 
                 prepareObjects(String.format("/devices/%s/properties/%s", sensor.getOid().toString(), "status"));
@@ -118,6 +120,8 @@ public class VicinityApiController {
 
                 responseTemplate.setActions(emptyList());
                 responseTemplate.setEvents(emptyList());
+
+                exposedDevices.add(responseTemplate);
             }
         }
 
@@ -125,7 +129,7 @@ public class VicinityApiController {
 
         // TODO: temp value "1"
         thingDescriptor.setAdapterId("1");
-        thingDescriptor.setThingDescriptions(singletonList(responseTemplate));
+        thingDescriptor.setThingDescriptions(exposedDevices);
 
         // TODO: add last modified header
         return new ResponseEntity<>(thingDescriptor, headers, status);

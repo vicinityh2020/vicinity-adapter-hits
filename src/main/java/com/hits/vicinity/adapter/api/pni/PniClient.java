@@ -7,6 +7,7 @@ import com.hits.vicinity.adapter.domain.pni.ParkingLot;
 import com.hits.vicinity.adapter.domain.pni.ParkingSensor;
 import com.sun.media.jfxmedia.logging.Logger;
 import jdk.nashorn.internal.ir.ObjectNode;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Value;

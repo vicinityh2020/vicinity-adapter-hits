@@ -31,7 +31,7 @@ public class ScheduledPolling {
         this.parkingLotRepository = parkingLotRepository;
     }
 
-    @Scheduled(fixedRate = 5000)
+    @Scheduled(fixedRate = 60000)
     public void pollSensors() {
 
         /* ************************************************** */
@@ -56,7 +56,7 @@ public class ScheduledPolling {
             other.setCarCounter(sensor.getCarCounter());
             other.setParkingLotName(sensor.getParkingLot());
             other.setParkingSpaceId(sensor.getParkingSpace());
-            //other.setStatus(sensor.getStatus());
+            other.setStatus(sensor.getStatus());
             other.setCarPresence(sensor.getCarPresence());
 
             Optional<ParkingSensorObject> res = parkingSensorRepository.findBySensorId(sensor.getSensorId());
