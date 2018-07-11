@@ -9,6 +9,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonPropertyOrder({
@@ -32,7 +33,7 @@ public class ObjectsJson {
     @JsonProperty("actions")
     private List<Object> actions = null;
     @JsonProperty("events")
-    private List<Object> events = null;
+    private List<JsonNode> events = null;
     @JsonIgnore
     private Map<String, Object> additionalProperties = new HashMap<String, Object>();
 
@@ -87,12 +88,12 @@ public class ObjectsJson {
     }
 
     @JsonProperty("events")
-    public List<Object> getEvents() {
+    public List<JsonNode> getEvents() {
         return events;
     }
 
     @JsonProperty("events")
-    public void setEvents(List<Object> events) {
+    public void setEvents(List<JsonNode> events) {
         this.events = events;
     }
 

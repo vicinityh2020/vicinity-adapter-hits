@@ -3,6 +3,7 @@ package com.hits.vicinity.adapter.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.hits.vicinity.adapter.domain.vicinity.*;
@@ -54,6 +55,25 @@ public class VicinityApiController {
                 .putPOJO("schema", mapper.valueToTree(singletonMap("type", type)));
     }
 
+    private JsonNode prepareEvent(ParkingSensorObject device) {
+
+        ArrayNode fields = mapper.createArrayNode();
+        fields.add(createField("value", "integer"));
+        fields.add(createField("time", "string"));
+
+        OutputInputSchema output = new OutputInputSchema();
+        output.setAdditionalProperty("description", "state describing if sensor is occupied or not.");
+        output.setType("object");
+        output.setField(fields);
+
+        ObjectNode eventDescription = mapper.createObjectNode();
+        eventDescription.put("eid", "sensor-" + device.getOid());
+        eventDescription.put("monitors", "adapters:DeviceStatus");
+        eventDescription.putPOJO("output", output);
+
+        return eventDescription;
+    }
+
     private void prepareObjects(String endpoint) {
 
         List<ObjectNode> outputFields = new ArrayList<>();
@@ -103,14 +123,11 @@ public class VicinityApiController {
 
             status = HttpStatus.OK;
 
-            // TODO: for now we only have 1 property and 1 object
-            // TODO: make it so that more properties/objects can be added to the responseTemplate
             for (ParkingSensorObject sensor : sensors) {
 
                 ObjectsJson responseTemplate = new ObjectsJson();
 
                 responseTemplate.setOid(sensor.getOid().toString());
-                // TODO: TEMP, use real name/type later
                 responseTemplate.setName(sensor.getSensorId());
                 responseTemplate.setType("core:Device");
 
@@ -122,12 +139,12 @@ public class VicinityApiController {
                 responseTemplate.setEvents(emptyList());
 
                 exposedDevices.add(responseTemplate);
+                responseTemplate.setEvents(singletonList(prepareEvent(sensor)));
             }
         }
 
         ThingDescriptor thingDescriptor = new ThingDescriptor();
 
-        // TODO: temp value "1"
         thingDescriptor.setAdapterId("1");
         thingDescriptor.setThingDescriptions(exposedDevices);
 
