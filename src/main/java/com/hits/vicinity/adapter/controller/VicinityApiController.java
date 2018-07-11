@@ -145,8 +145,20 @@ public class VicinityApiController {
             throw new NoResultException("Supplied property does not exist for the given oid");
         }
 
-        // TODO: Fix 1 to be sensor.getStatus()
-        return new ResponseEntity<>(new Property(pid, 1), HttpStatus.OK);
+        int val = 0;
+        switch (sensor.getStatus().toLowerCase()) {
+            case "vacant":
+                val = 1;
+                break;
+            case "occupied":
+                val = 2;
+                break;
+            case "recalibrating":
+                val = 3;
+                break;
+        }
+
+        return new ResponseEntity<>(new Property(pid, val), HttpStatus.OK);
 
     }
 
