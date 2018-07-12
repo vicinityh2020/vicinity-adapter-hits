@@ -5,6 +5,7 @@ import com.hits.vicinity.adapter.entity.ParkingLotObject;
 import com.hits.vicinity.adapter.entity.ParkingSensorObject;
 import com.hits.vicinity.adapter.repository.ParkingLotRepository;
 import com.hits.vicinity.adapter.repository.ParkingSensorRepository;
+import com.hits.vicinity.adapter.service.EventService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -21,14 +22,17 @@ public class ScheduledPolling {
     private static final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
     ParkingSensorRepository parkingSensorRepository;
     ParkingLotRepository parkingLotRepository;
+    EventService eventService;
+
     private PniClient pniClient;
 
     public ScheduledPolling(PniClient pniClient,
                             ParkingSensorRepository parkingSensorRepository,
-                            ParkingLotRepository parkingLotRepository) {
+                            ParkingLotRepository parkingLotRepository, EventService eventService) {
         this.pniClient = pniClient;
         this.parkingSensorRepository = parkingSensorRepository;
         this.parkingLotRepository = parkingLotRepository;
+        this.eventService = eventService;
     }
 
     @Scheduled(fixedRate = 60000)
@@ -48,6 +52,7 @@ public class ScheduledPolling {
         parkingSensorRepository.findBySensorId("");
 
         for (ParkingSensor sensor : parkingSensors) {
+
             ParkingSensorObject other = new ParkingSensorObject();
 
             other.setSensorId(sensor.getSensorId());
@@ -65,6 +70,24 @@ public class ScheduledPolling {
             parkingSensorObject.setStatus(sensor.getStatus());
 
             parkingSensorRepository.save(parkingSensorObject);
+
+            eventService.publishEvent(parkingSensorObject);
         }
+    }
+
+    public static int translateStatusToInt(String status) {
+        int val = 0;
+        switch (status.toLowerCase()) {
+            case "vacant":
+                val = 1;
+                break;
+            case "occupied":
+                val = 2;
+                break;
+            case "recalibrating":
+                val = 3;
+                break;
+        }
+        return val;
     }
 }

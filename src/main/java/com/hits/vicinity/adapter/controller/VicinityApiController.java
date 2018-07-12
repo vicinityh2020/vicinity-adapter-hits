@@ -6,10 +6,13 @@ import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.hits.vicinity.adapter.api.pni.ScheduledPolling;
 import com.hits.vicinity.adapter.domain.vicinity.*;
 import com.hits.vicinity.adapter.entity.ParkingSensorObject;
 import com.hits.vicinity.adapter.repository.ParkingLotRepository;
 import com.hits.vicinity.adapter.repository.ParkingSensorRepository;
+import com.hits.vicinity.adapter.service.EventService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -34,6 +37,9 @@ import static java.util.Collections.*;
 
 @RestController
 public class VicinityApiController {
+
+    @Value("${adapter.id}")
+    private String adapterId;
 
     private ParkingLotRepository parkingLotRepository;
     private ParkingSensorRepository parkingSensorRepository;
@@ -145,7 +151,7 @@ public class VicinityApiController {
 
         ThingDescriptor thingDescriptor = new ThingDescriptor();
 
-        thingDescriptor.setAdapterId("1");
+        thingDescriptor.setAdapterId(this.adapterId);
         thingDescriptor.setThingDescriptions(exposedDevices);
 
         // TODO: add last modified header
@@ -162,18 +168,7 @@ public class VicinityApiController {
             throw new NoResultException("Supplied property does not exist for the given oid");
         }
 
-        int val = 0;
-        switch (sensor.getStatus().toLowerCase()) {
-            case "vacant":
-                val = 1;
-                break;
-            case "occupied":
-                val = 2;
-                break;
-            case "recalibrating":
-                val = 3;
-                break;
-        }
+        int val = ScheduledPolling.translateStatusToInt(sensor.getStatus());
 
         return new ResponseEntity<>(new Property(pid, val), HttpStatus.OK);
 
