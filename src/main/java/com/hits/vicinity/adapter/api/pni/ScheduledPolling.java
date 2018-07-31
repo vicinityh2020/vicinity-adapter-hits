@@ -35,7 +35,7 @@ public class ScheduledPolling {
         this.eventService = eventService;
     }
 
-    @Scheduled(fixedRate = 60000)
+    @Scheduled(fixedRate = 20000)
     public void pollSensors() {
 
         /* ************************************************** */

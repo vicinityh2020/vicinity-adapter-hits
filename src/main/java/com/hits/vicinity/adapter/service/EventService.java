@@ -42,6 +42,7 @@ public class EventService {
         eventHeaders.set("adapter-id", this.adapterId);
 
         ObjectNode eventBody = mapper.createObjectNode();
+        eventBody.put("sensor_id", device.getSensorId());
         eventBody.put("value", device.getStatus());
         eventBody.put("time", device.getLastModifiedDate().toString());
 
