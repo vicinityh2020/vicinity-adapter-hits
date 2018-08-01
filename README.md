@@ -1,6 +1,6 @@
 # HITS - PNI Adapter
 ## Architecture
-The adapter bridges communication with the PNI cloud and the VICINITY agent. The adapter consumes the aforementioned endpoints and produces the appropriate data.
+The adapter bridges communication between the PNI cloud and the VICINITY agent. The adapter consumes the aforementioned endpoints and produces the appropriate data.
 
 ![](./doc/img/arch.png)
 
@@ -62,6 +62,14 @@ PGPASSWORD=USER_PASSWORD
 PGPORT=YOUR_PORT
 PGLOCALEDIR=/home/opt/PostgreSQL/9.6/share/locale
 MANPATH=$MANPATH:/home/opt/PostgreSQL/9.6/share/man
+```
+
+Finally, alter your `application.properties` datasource properties to reflect your DB configurations
+
+```java
+spring.datasource.url=jdbc:postgresql://localhost:<psql_port>/<psql_dbname>
+spring.datasource.username=<psql_username>
+spring.datasource.password=<psql_password>
 ```
 
 ## Compilation & Running using Maven
